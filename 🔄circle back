@@ -1,0 +1,55 @@
+node server.js
+
+npm init -y
+npm install express multer
+
+const express = require('express');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+
+const app = express();
+const PORT = 3000;
+
+// Set up multer for file handling
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'uploads/'); // Directory where files will be saved
+    },
+    filename: function (req, file, cb) {
+        cb(null, file.originalname); // Save with original filename
+    }
+});
+
+const upload = multer({ storage: storage });
+
+// Endpoint to upload and process file
+app.post('/upload', upload.single('file'), (req, res) => {
+    const file = req.file;
+
+    if (!file) {
+        return res.status(400).send('No file uploaded.');
+    }
+
+    // Process file here (e.g., apply your stylization logic)
+    // In this example, we're just sending the file back as is
+
+    const stylizedFilePath = path.join(__dirname, 'uploads', file.originalname);
+
+    // Ensure file exists
+    if (fs.existsSync(stylizedFilePath)) {
+        // Send back the stylized file with original name
+        res.download(stylizedFilePath, file.originalname, (err) => {
+            if (err) {
+                console.error('Error in file download:', err);
+            }
+        });
+    } else {
+        res.status(404).send('File not found.');
+    }
+});
+
+// Start the server
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+});
