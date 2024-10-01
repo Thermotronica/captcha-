@@ -1,0 +1,91 @@
+git init
+git add .
+git commit -m "Initial commit for CAPTCHA demo"
+git remote add origin https://github.com/Thermotronica/captcha-.git
+git branch -M main
+git push -u origin main
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code CAPTCHA</title>
+    <style>
+        #canvas {
+            border: 1px solid black;
+        }
+        #draggableCursor {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background-color: red;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <div id="draggableCursor"></div>
+
+    <script>
+        // Get canvas and context
+        const canvas = document.getElementById('canvas');
+        const context = canvas.getContext('2d');
+        const cursor = document.getElementById('draggableCursor');
+
+        // Set canvas dimensions
+        canvas.width = 400;  // Adjust to your QR code image's width
+        canvas.height = 400; // Adjust to your QR code image's height
+
+        // Load the QR code image
+        const qrCodeImage = new Image();
+        qrCodeImage.src = './Image.png'; // Point to your QR code image
+
+        qrCodeImage.onload = () => {
+            context.drawImage(qrCodeImage, 0, 0, canvas.width, canvas.height);
+        };
+
+        // Make the cursor draggable
+        let isDragging = false;
+        cursor.addEventListener('mousedown', (e) => {
+            isDragging = true;
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (isDragging) {
+                cursor.style.left = `${e.pageX - 25}px`; // Center the cursor
+                cursor.style.top = `${e.pageY - 25}px`;
+            }
+        });
+
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+            checkCollision();
+        });
+
+        // Check if the cursor is over a specific part of the canvas
+        function checkCollision() {
+            const cursorRect = cursor.getBoundingClientRect();
+            const canvasRect = canvas.getBoundingClientRect();
+
+            const cursorCenterX = cursorRect.left + cursorRect.width / 2;
+            const cursorCenterY = cursorRect.top + cursorRect.height / 2;
+
+            const targetX = canvasRect.left + canvasRect.width / 2; // Example target area (center of QR code)
+            const targetY = canvasRect.top + canvasRect.height / 2;
+
+            const distance = Math.sqrt(
+                Math.pow(cursorCenterX - targetX, 2) + Math.pow(cursorCenterY - targetY, 2)
+            );
+
+            if (distance < 50) {  // Adjust this for a specific proximity
+                alert('CAPTCHA Passed!');
+            }
+        }
+    </script>
+</body>
+</html>
